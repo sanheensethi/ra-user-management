@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  user-management-service:
+    image: user-management-service-image
+    container_name: user-management-service
+    restart: unless-stopped
+    ports:
+      - "${EXTERNAL_PORT}:${PORT}"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://user-management-service:7000/user_management/api/v1/health').then((r) => { if (r.status !==200) throw new Error(r.status) })"
+        ]
+      timeout: 10s
+      interval: 5s
+      retries: 3
+    environment:
+      PORT: ${PORT}
+      EXTERNAL_PORT: ${EXTERNAL_PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      POSTGREST_URL: ${POSTGREST_URL}
+      LOGS_MAX_SIZE_PER_FILE: ${LOGS_MAX_SIZE_PER_FILE}
+      LOGS_MAX_FILES: ${LOGS_MAX_FILES}
+      LOGS_TIME_FORMAT: ${LOGS_TIME_FORMAT}
+      LOGS_FILENAME_DATE_PATTERN: ${LOGS_FILENAME_DATE_PATTERN}
+
+    volumes:
+      - /var/risk-manager/logs/user-management-service:/usr/src/app/logs

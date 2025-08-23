@@ -1,0 +1,4 @@
+auth service - register user, login, register via link send to mail, reset password, confirmation email link
+
+user management - when user logged in, and want to hire inside him, then he needs to create a company under him,
+                  and invite another users via link (invitation link send by user management)
