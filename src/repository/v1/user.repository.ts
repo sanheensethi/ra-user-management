@@ -16,7 +16,7 @@ export class UserRepository {
   }
 
   async findByEmail(email: string, select: string[] = ["*"]) {
-    return pgSelect("users", { email, select });
+    return pgSelect("users", { email: "eq." + email, select });
   }
 
   async create(userData: any) {
