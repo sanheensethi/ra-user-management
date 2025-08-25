@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import logger from '../../logger/logger';
+import logger from '../../logger/v1/logger';
 import CompanyService from '../../services/v1/company.service';
 
 class CompanyController {
@@ -12,7 +12,6 @@ class CompanyController {
 
     private initializeRoutes() {
         this.router.get('/company', this.getAllCompany.bind(this));
-        this.router.post('/company', this.createCompany.bind(this));
     }
 
     private async getAllCompany(req: Request, res: Response) {
@@ -32,25 +31,7 @@ class CompanyController {
             res.status(500).json({ message: "Internal Server Error" });
         }
     }
-
-    private async createCompany(req: Request, res: Response) {
-        try {
-            const companyData = req.body;
-            // Logic to create a new company
-            const result = await this.companyService.createCompany(companyData);
-            if (result.success) {
-                res.status(201).json(result.data);
-            } else {
-                res.status(400).json({ message: result.message });
-            }
-        } catch (error: any) {
-            logger.error(`[CompanyController.createCompany] creating company: ${error.message} | Stack Trace: ${error.stack}`);
-            res.status(500).json({ message: "Internal Server Error" });
-        }
-    }
-
-
-
+    
     public getRouter() {
         return this.router;
     }

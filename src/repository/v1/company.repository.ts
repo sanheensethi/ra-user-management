@@ -1,30 +1,22 @@
-// repositories/company.repository.ts
+// repositories/user.repository.ts
 import { pgSelect, pgInsert, pgUpdate, pgDelete } from "./pgrest/postgrest";
 
 export class CompanyRepository {
   async findAll(
-    offset: number,
-    limit: number,
     filters: Record<string, any> = {},
-    columns: string[] = []
+    select: string[] = ["*"],
+    offset?: number,
+    limit?: number
   ) {
-    const params: Record<string, any> = {
-      offset,
-      limit,
-      ...filters,
-    };
-    if (columns.length > 0) {
-      params.select = columns.join(",");
-    }
-    return pgSelect("companies", params);
+    return pgSelect("companies", { ...filters, offset, limit, select });
   }
 
-  async findById(id: string, columns: string[] = []) {
-    const params: Record<string, any> = { id: "eq." + id };
-    if (columns.length > 0) {
-      params.select = columns.join(",");
-    }
-    return pgSelect("companies", params);
+  async findById(id: string, select: string[] = ["*"]) {
+    return pgSelect("companies", { id: "eq." + id, select });
+  }
+
+  async findCompanyByOwnerId(ownerId: number, select: string[] = ["*"]) {
+    return pgSelect("companies", { owner_id: "eq." + ownerId    , select });
   }
 
   async create(companyData: any) {

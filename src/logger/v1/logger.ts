@@ -1,6 +1,6 @@
 import { createLogger, format, LoggerOptions, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
-import { config } from "../config/v1/config";
+import { config } from "../../config/v1/config";
 
 // Define the options for the logger
 const options: LoggerOptions = {

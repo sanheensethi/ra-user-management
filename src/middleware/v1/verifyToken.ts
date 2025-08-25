@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { config } from "../../config/v1/config";
-import logger from "../../logger/logger";
+import logger from "../../logger/v1/logger";
 
 export interface JwtUser {
   id: number;
@@ -53,7 +53,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
       req.user = {
         id: decoded.id,
         email: decoded.email,
-        base_role: decoded.base_role || "WORKER" // Default to WORKER if not provided
+        base_role: decoded.base_role || "COMPANY" // Default to COMPANY if not provided
         } as JwtUser;
     }
 

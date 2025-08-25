@@ -1,6 +1,6 @@
 // errorHandler.ts
 import { Request, Response, NextFunction } from "express";
-import logger from "../../logger/logger";
+import logger from "../../logger/v1/logger";
 
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
     logger.error(`Error: ${err.message} Stack Trace: ${err.stack}`);

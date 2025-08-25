@@ -1,3 +1,4 @@
+import logger from "../../logger/v1/logger";
 import { CompanyRepository } from "../../repository/v1/company.repository";
 
 
@@ -19,28 +20,16 @@ class CompanyService {
         try {
             // Logic to fetch all companies from the database
             const offset = (page - 1) * limit;
-            const res = await this.companyRepository.findAll(offset, limit);
+            const res = await this.companyRepository.findAll({}, ["*"], offset, limit);
             if (!res || res.success === false) {
+                logger.error(`[CompanyService.getAllCompanies] Error fetching company details: ${JSON.stringify(res)}`);
                 return { success: false, message: "No companies found" };
             } else {
                 return { success: true, data: res.data };
             }
         } catch (error: any) {
+            logger.error(`[CompanyService.getAllCompanies] Error fetching company details: ${error.message} | Stack Trace: ${error.stack}`);
             throw new Error(`[CompanyService.getAllCompanies] Error fetching company details: ${error.message}`);
-        }
-    }
-
-    async createCompany(companyData: any): Promise<any> {
-        try {
-            // Logic to create a new company in the database
-            const res = await this.companyRepository.create(companyData);
-            if (!res || res.success === false) {
-                return { success: false, message: "Company creation failed" };
-            } else {
-                return { success: true, data: res.data[0] };
-            }
-        } catch (error: any) {
-            throw new Error(`[CompanyService.createCompany] Error creating company: ${error.message}`);
         }
     }
 
@@ -49,11 +38,13 @@ class CompanyService {
             // Logic to update a company in the database
             const res = await this.companyRepository.update(companyId, companyData);
             if (!res || res.success === false) {
+                logger.error(`[CompanyService.updateCompany] Error updating company: ${JSON.stringify(res)}`);
                 return { success: false, message: "Company update failed" };
             } else {
                 return { success: true, data: res.data[0] };
             }
         } catch (error: any) {
+            logger.error(`[CompanyService.updateCompany] Error updating company: ${error.message} | Stack Trace: ${error.stack}`);
             throw new Error(`[CompanyService.updateCompany] Error updating company: ${error.message}`);
         }
     }

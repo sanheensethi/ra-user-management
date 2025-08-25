@@ -1,8 +1,7 @@
-import { log } from "console";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const service_name = "user_management";
+const service_name = "user_dashboard_service";
 const default_service_port = 4000;
 const default_log_level = "info";
 
