@@ -15,4 +15,5 @@ export const config = {
   logsMaxSizePerFile: process.env.LOGS_MAX_SIZE_PER_FILE || '30m',
   logsMaxFiles: process.env.LOGS_MAX_FILES || '14d',
   logLevel: process.env.LOG_LEVEL || default_log_level,
+  inviteLinkFrontendUrl: process.env.INVITE_LINK_FRONTEND_URL || "http://localhost:3000",
 };

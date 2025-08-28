@@ -5,6 +5,18 @@ export function isValidBaseRole(role: string): boolean {
     return validRoles.includes(role);
 }
 
+export function validateInvitationTypeInputs(type: string, bodyData: any) {
+    if (type == "COMPANY_MEMBER") {
+        if (!bodyData.role_in_company) {
+            return {
+                success: false,
+                message: "Role in Company are required for COMPANY_MEMBER type"
+            }
+        }
+    }
+    return { success: true };
+}
+
 export function encryptPassword(password: string): string {
     const saltRounds = 10;
     const hash = bcrypt.hashSync(password, saltRounds);
