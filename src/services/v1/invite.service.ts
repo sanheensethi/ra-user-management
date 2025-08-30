@@ -15,6 +15,22 @@ class InviteService {
         this.companyMemberService = new CompanyMemberService();
     }
 
+    async getAllInvites(page: number, limit: number) {
+        try {
+            const res = await this.inviteRepository.findAllPaginated({}, ["*"], page, limit);
+            if (!res || res.success === false) {
+                logger.error(`[InviteService.getAllInvites] Error fetching invite details: ${JSON.stringify(res)}`);
+                return { success: false, message: "No invites found" };
+            } else {
+                logger.info("[InviteService.getAllInvites] Invites fetched successfully", JSON.stringify('pagination' in res ? JSON.stringify(res.pagination) : ''));
+                return { success: true, data: res.data, pagination: res && 'pagination' in res ? res.pagination : undefined };
+            }
+        } catch (error: any) {
+            logger.error(`[InviteService.getAllInvites] Error fetching invite details: ${error.message} | Stack Trace: ${error.stack}`);
+            return { success: false, message: "No invites found" };
+        }
+    }
+
     async getInvitesByCode(code: string) {
         try {
             const invites = await this.inviteRepository.findByCode(code);

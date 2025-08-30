@@ -48,9 +48,58 @@ async function request(
   }
 }
 
+async function requestRaw(
+  method: string,
+  table: string,
+  { params, body }: { params?: Record<string, any>; body?: any } = {}
+) {
+  try {
+    const query = params
+      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+      : "";
+
+    const res = await fetch(`${baseURL}/${table}${query}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        // total nikaalne ke liye zaroori
+        Prefer: "return=representation,count=exact",
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw {
+        success: false,
+        status: res.status,
+        error: data.message || "Unexpected error",
+        code: data.code || "UNKNOWN",
+        details: data.details || null,
+      };
+    }
+
+    return { success: true, data, headers: res.headers, status: res.status };
+  } catch (err: any) {
+    return {
+      success: false,
+      status: err.status || 500,
+      error: err.error || err.message || "Internal Server Error",
+      code: err.code || "INTERNAL_ERROR",
+      details: err.details || null,
+      headers: undefined,
+      data: undefined,
+    };
+  }
+}
+
 // SELECT (GET rows)
 export const pgSelect = (table: string, params?: Record<string, any>) =>
   request("GET", table, { params });
+
+export const pgPagination = (table: string, params?: Record<string, any>) =>
+  requestRaw("GET", table, { params });
 
 // INSERT (POST new row)
 export const pgInsert = (table: string, data: any) =>
