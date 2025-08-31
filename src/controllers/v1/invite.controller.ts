@@ -40,10 +40,12 @@ class InviteController {
 
     private async createInvite(req: Request, res: Response): Promise<Response> {
         try {
-            // TODO: Replace with req.user?.id once auth middleware is implemented
-            // invite_by_id = req.user?.id
+            const invited_by_id = req.user?.id;
+            if (!invited_by_id) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
 
-            const { email, type, role_in_company, invited_by_id  } = req.body;
+            const { email, type, role_in_company  } = req.body;
 
             // get the company_id from the user data, and this is only added by company owner Admin/ company manager
 

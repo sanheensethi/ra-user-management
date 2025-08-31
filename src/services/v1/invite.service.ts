@@ -79,15 +79,24 @@ class InviteService {
         try {
             const { email, type, invited_by_id, role_in_company } = data;
 
-            // get the company id from company member table // check it should be company owner or company manager
-
-            const companyMemberResult = await this.companyMemberService.getCompanyId(invited_by_id);
-            if (!companyMemberResult || companyMemberResult.success === false) {
-                logger.error(`[InviteService.createInvite] Error fetching company ID for user ID: ${invited_by_id} | Response: ${JSON.stringify(companyMemberResult)}`);
-                return { success: false, details: "Company ID not found" };
+            // get the company id from company service as the invited by id is owner.
+            const companyData = await this.companyService.getCompanyByOwnerId(invited_by_id);
+            let company_id = null;
+            if (companyData.success) {
+                logger.info("[InviteService.getAllInvites] Company exists for this user");
+                // for contractor and owner, company always exists for them.
+                company_id = companyData.data.id;
+            } else {
+                logger.info("[InviteService.getAllInvites] Company does not exist for this user");
+                // it means, current user is either ADMIN / Manager of the company other then owner
+                // get the company id from the company members
+                const companyMemberResult = await this.companyMemberService.getCompanyId(invited_by_id);
+                if (!companyMemberResult || companyMemberResult.success === false) {
+                    logger.error(`[InviteService.getAllInvites] Error fetching company ID for user ID: ${invited_by_id} | Response: ${JSON.stringify(companyMemberResult)}`);
+                    return { success: false, details: "Company ID not found" };
+                }
+                company_id = companyMemberResult.data.company_id;
             }
-
-            const company_id = companyMemberResult.data;
 
             logger.info(`[InviteService.createInvite] Creating invitation for email: ${email}, Company ID: ${company_id}`);
 
