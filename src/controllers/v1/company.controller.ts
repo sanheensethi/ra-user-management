@@ -15,7 +15,7 @@ class CompanyController {
 
     private initializeRoutes() {
         this.router.get('/company', this.getCompany.bind(this)); // i own
-        // this.router.get('/hiredBy/company', this.getAllCompany.bind(this)); // i am hired
+        this.router.get('/company/hiredBy', this.getHiredBy.bind(this)); // i am hired
         this.router.get('/company/hired', this.getIHired.bind(this)); // i hired
     }
 
@@ -36,6 +36,34 @@ class CompanyController {
             logger.error(`[CompanyController.getCompany] fetching company details: ${error.message} | Stack Trace: ${error.stack}`);
             res.status(500).json({ message: "Internal Server Error" });
         }
+    }
+
+    private async getHiredBy(req: Request, res: Response) {
+        // user_id in company_members table is the current user
+        // get all data from company_members where user_id = req.user?.id
+        // then get all comapny_id -> join to get all company data
+        // and get the role in company and hired_by:int and it's name also
+
+        try {
+            const userId = Number(req.user?.id) || 0;
+            if (userId === 0) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+            let { page = 1, limit = 10 } = req.query;
+            page = Number(page);
+            limit = Number(limit);
+            // Logic to get company details
+            let data = await this.companyMemberService.getCompanyMemebrsByUserId(userId, page, limit);
+            if (data.success) {
+                res.status(200).json({data: data.data, pagination: data.pagination});
+            } else {
+                res.status(400).json({ message: data.message });
+            }
+        } catch (error: any) {
+            logger.error(`[CompanyController.getHiredBy] fetching company details: ${error.message} | Stack Trace: ${error.stack}`);
+            res.status(500).json({ message: "Internal Server Error" });
+        }
+
     }
 
     private async getIHired(req: Request, res: Response) {

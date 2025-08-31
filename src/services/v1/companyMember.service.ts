@@ -43,7 +43,7 @@ class CompanyMemberService {
 
     async getCompanyMembersByCompanyId(companyId: number, page: number, limit: number) {
         try {
-            const res = await this. companyMemberRepository.findAllPaginated(
+            const res = await this.companyMemberRepository.findAllPaginated(
                 { company_id: "eq." + companyId },
                 ["id,role_in_company,created_at, hired:user_id(id,name,email), hiredBy:hired_by(id,name,email)"],
                 page,
@@ -60,6 +60,26 @@ class CompanyMemberService {
             return { success: false, message: "Company Members not found" };
         }
     }
+
+    async getCompanyMemebrsByUserId(userId: number, page: number, limit: number) {
+        try {
+            const res = await this.companyMemberRepository.findAllPaginated(
+                { user_id: "eq." + userId },
+                ["id,role_in_company,created_at,company:company_id(id,name),hired:user_id(id,name,email), hiredBy:hired_by(id,name,email)"],
+                page,
+                limit
+            )
+            if (!res || res.success === false) {
+                logger.error(`[CompanyMemberService.getCompanyMemebrsByUserId] Error fetching company members for user ID: ${userId} | Response: ${JSON.stringify(res)}`);
+                return { success: false, message: "Company Members not found" };
+            } else {
+                return { success: true, data: res.data, pagination: res && 'pagination' in res ? res.pagination : undefined };
+            }
+        } catch (error: any) {
+            logger.error(`[CompanyMemberService.getCompanyMemebrsByUserId] Error fetching company members for user ID: ${userId} | Stack Trace: ${error.stack}`);
+            return { success: false, message: "Company Members not found" };
+        }
+    }  
 
     public static getInstance(): CompanyMemberService {
         if (!CompanyMemberService.instance) {
