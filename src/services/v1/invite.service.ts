@@ -3,27 +3,51 @@ import { apiInviteFactory, apiInviteUserFactory } from "../../factory/api/apiInv
 import { dbCreateCompanyMemberInviteFactory } from "../../factory/db/dbInvite.factory";
 import logger from "../../logger/v1/logger";
 import { InviteRepository } from "../../repository/v1/invite.repository";
+import CompanyService from "./company.service";
 import CompanyMemberService from "./companyMember.service";
 
 class InviteService {
     private static instance: InviteService;
     private inviteRepository: InviteRepository;
     private companyMemberService: CompanyMemberService;
+    private companyService: CompanyService;
 
     constructor() {
         this.inviteRepository = new InviteRepository();
-        this.companyMemberService = new CompanyMemberService();
+        this.companyMemberService = CompanyMemberService.getInstance();
+        this.companyService = CompanyService.getInstance();
     }
 
-    async getAllInvites(page: number, limit: number) {
+    async getAllInvites(userId: number, page: number, limit: number) {
         try {
-            const res = await this.inviteRepository.findAllPaginated({}, ["*"], page, limit);
+
+            // check company exist for current user ? YES -> get all invites of the company
+            const companyData = await this.companyService.getCompanyByOwnerId(userId);
+            let companyId = null;
+            if (companyData.success) {
+                logger.info("[InviteService.getAllInvites] Company exists for this user");
+                // for contractor and owner, company always exists for them.
+                companyId = companyData.data.id;
+            } else {
+                logger.info("[InviteService.getAllInvites] Company does not exist for this user");
+                // it means, current user is either ADMIN / Manager of the company other then owner
+                // get the company id from the company members
+                const companyMemberResult = await this.companyMemberService.getCompanyId(userId);
+                if (!companyMemberResult || companyMemberResult.success === false) {
+                    logger.error(`[InviteService.getAllInvites] Error fetching company ID for user ID: ${userId} | Response: ${JSON.stringify(companyMemberResult)}`);
+                    return { success: false, message: "Company ID not found" };
+                }
+                companyId = companyMemberResult.data.company_id;
+            }
+            const res = await this.inviteRepository.findAllPaginated({company_id: `eq.${companyId}`}, ["*, users(*)"], page, limit);
             if (!res || res.success === false) {
                 logger.error(`[InviteService.getAllInvites] Error fetching invite details: ${JSON.stringify(res)}`);
                 return { success: false, message: "No invites found" };
             } else {
+                let inviteData = res.data.map((invite: any) => apiInviteUserFactory(invite));
+                console.log(inviteData);
                 logger.info("[InviteService.getAllInvites] Invites fetched successfully", JSON.stringify('pagination' in res ? JSON.stringify(res.pagination) : ''));
-                return { success: true, data: res.data, pagination: res && 'pagination' in res ? res.pagination : undefined };
+                return { success: true, data: inviteData, pagination: res && 'pagination' in res ? res.pagination : undefined };
             }
         } catch (error: any) {
             logger.error(`[InviteService.getAllInvites] Error fetching invite details: ${error.message} | Stack Trace: ${error.stack}`);

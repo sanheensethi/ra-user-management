@@ -8,6 +8,7 @@ import UserController from "./controllers/v1/user.controller";
 import { routeHandler } from "./middleware/v1/routeHandler";
 import SiteSchemaController from "./controllers/v1/siteSchema.controller";
 import InviteController from "./controllers/v1/invite.controller";
+import verifyToken from "./middleware/v1/verifyToken";
 
 
 const app = express();
@@ -32,7 +33,7 @@ app.use('/user_dashboard/api/v1/health', (req, res) => {
 app.use('/user_dashboard/api/v1', companyController.getRouter());
 app.use('/user_dashboard/api/v1', userController.getRouter());
 app.use('/user_dashboard/api/v1', siteSchemaController.getRouter());
-app.use('/user_dashboard/api/v1', inviteController.getRouter());
+app.use('/user_dashboard/api/v1', verifyToken, inviteController.getRouter());
 
 app.listen(config.port, () => {
   console.log(`user_dashboard listening on :${config.port}`);

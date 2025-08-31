@@ -20,12 +20,12 @@ class InviteController {
 
     private async getAllInvites(req: Request, res: Response): Promise<Response> {
         try {
-            // TODO: const user_id = req.user?.id; // take the user id from token
-            // if current user contractor -> there is no company yet, show invites by CONTRACTOR based on hired_by_id: user_id
-            // if current user is manager -> show all company invites
-            // if current user is admin -? show all company invites
+            const userId = Number(req.user?.id) || 0;
+            if (userId === 0) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
             const { page, limit } = req.query;
-            const invites = await this.inviteService.getAllInvites(Number(page) || 1, Number(limit) || 10);
+            const invites = await this.inviteService.getAllInvites(userId, Number(page) || 1, Number(limit) || 10);
             if (invites.success) {
                 return res.status(200).json({data: invites.data, pagination: invites.pagination});
             } else {

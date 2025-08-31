@@ -6,21 +6,11 @@ import logger from "../../logger/v1/logger";
 export interface JwtUser {
   id: number;
   email: string;
-  base_role: "SUPER_ADMIN" | "COMPANY" | "WORKER" | "CONTRACTOR";
-}
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: JwtUser;
-    }
-  }
+  base_role: "COMPANY" | "WORKER" | "CONTRACTOR";
 }
 
 const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers["authorization"];
-  logger.debug(`reqHeaders: ${JSON.stringify(req.headers)}`);
-  logger.debug(`authHeader: ${authHeader}`);
   
   if (!authHeader) {
     logger.warn(`No token provided. authorization: ${authHeader}`);
@@ -49,7 +39,6 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
 
     // Attach the decoded token's payload (such as user ID) to the request
     if (decoded && typeof decoded === "object") {
-      logger.debug(`decoded: ${JSON.stringify(decoded)}`);
       req.user = {
         id: decoded.id,
         email: decoded.email,

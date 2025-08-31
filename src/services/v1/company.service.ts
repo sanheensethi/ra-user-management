@@ -33,6 +33,22 @@ class CompanyService {
         }
     }
 
+    async getCompanyByOwnerId(ownerId: number): Promise<any> {
+        try {
+            // Logic to fetch all companies from the database
+            const res = await this.companyRepository.findCompanyByOwnerId(ownerId);
+            if (!res || res.success === false) {
+                logger.error(`[CompanyService.getCompanyByOwnerId] Error fetching company details: ${JSON.stringify(res)}`);
+                return { success: false, message: "No companies found" };
+            } else {
+                return { success: true, data: res.data[0] };
+            }
+        } catch (error: any) {
+            logger.error(`[CompanyService.getCompanyByOwnerId] Error fetching company details: ${error.message} | Stack Trace: ${error.stack}`);
+            throw new Error(`[CompanyService.getCompanyByOwnerId] Error fetching company details: ${error.message}`);
+        }
+    }
+
     async updateCompany(companyId: string, companyData: any): Promise<any> {
         try {
             // Logic to update a company in the database
