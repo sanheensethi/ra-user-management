@@ -30,7 +30,7 @@ app.use('/user_dashboard/api/v1/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'User Management Service is running' });
 });
 
-app.use('/user_dashboard/api/v1', companyController.getRouter());
+app.use('/user_dashboard/api/v1', verifyToken, companyController.getRouter());
 app.use('/user_dashboard/api/v1', userController.getRouter());
 app.use('/user_dashboard/api/v1', siteSchemaController.getRouter());
 app.use('/user_dashboard/api/v1', verifyToken, inviteController.getRouter());

@@ -1,3 +1,4 @@
+import { apiCompanyUserFactory } from "../../factory/api/apiCompany.factory";
 import logger from "../../logger/v1/logger";
 import { CompanyRepository } from "../../repository/v1/company.repository";
 
@@ -16,9 +17,22 @@ class CompanyService {
         return CompanyService.instance;
     }
 
-    async getAllCompanies(page:number, limit:number): Promise<any> {
+    async getAllCompanies(userId: number, page:number, limit:number): Promise<any> {
         try {
             // Logic to fetch all companies from the database
+            // ownedCompany
+            const companies = {
+                'ownedCompany': [], // i own
+                'hiredByCompany': [], // i am hired
+                'hiredCompany': [] // i hired others
+            }
+            const ownedCompanyRes = await this.getCompanyByOwnerId(userId);
+            if (ownedCompanyRes.success) {
+                companies.ownedCompany = ownedCompanyRes.data;
+            }
+
+
+
             const offset = (page - 1) * limit;
             const res = await this.companyRepository.findAll({}, ["*"], offset, limit);
             if (!res || res.success === false) {
@@ -36,12 +50,12 @@ class CompanyService {
     async getCompanyByOwnerId(ownerId: number): Promise<any> {
         try {
             // Logic to fetch all companies from the database
-            const res = await this.companyRepository.findCompanyByOwnerId(ownerId);
+            const res = await this.companyRepository.findCompanyByOwnerId(ownerId,["*, users(*)"]);
             if (!res || res.success === false) {
                 logger.error(`[CompanyService.getCompanyByOwnerId] Error fetching company details: ${JSON.stringify(res)}`);
                 return { success: false, message: "No companies found" };
             } else {
-                return { success: true, data: res.data[0] };
+                return { success: true, data: apiCompanyUserFactory(res.data[0]) };
             }
         } catch (error: any) {
             logger.error(`[CompanyService.getCompanyByOwnerId] Error fetching company details: ${error.message} | Stack Trace: ${error.stack}`);

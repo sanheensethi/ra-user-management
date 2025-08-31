@@ -1,5 +1,6 @@
 // repositories/user.repository.ts
-import { pgSelect, pgInsert, pgUpdate, pgDelete } from "./pgrest/postgrest";
+import { getPagination } from "../../utils/pagination";
+import { pgSelect, pgInsert, pgUpdate, pgDelete, pgPagination } from "./pgrest/postgrest";
 
 export class CompanyMemberRepository {
   async findAll(
@@ -10,6 +11,21 @@ export class CompanyMemberRepository {
   ) {
     return pgSelect("company_members", { ...filters, offset, limit, select });
   }
+
+  async findAllPaginated(
+      filters: Record<string, any> = {},
+      select: string[] = ["*"],
+      page: number = 1,
+      limit: number = 10,
+      order: string = "id.asc" // postgrest style: "column.asc|desc"
+    ) {
+      const offset = (Math.max(page, 1) - 1) * limit;
+      const res = await pgPagination("company_members", { ...filters, select, order, offset, limit });
+      if (!res.success) return res;
+  
+      const pagination = getPagination(res.headers!, offset, limit);
+      return { success: true, data: res.data, pagination: pagination };
+    }
 
   async findById(id: string, select: string[] = ["*"]) {
     return pgSelect("company_members", { id: "eq." + id, select });
