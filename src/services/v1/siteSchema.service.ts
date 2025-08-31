@@ -17,6 +17,21 @@ class SiteSchemaService {
         return SiteSchemaService.instance;
     }
 
+    public async getAllSchemaNames(company_id: string) {
+        try {
+            const res = await this.siteSchemaRepository.findAll({company_id: "eq." + company_id}, ["id, schema_name"], 0, 9999);
+            console.log(res);   
+            if (!res || res.success === false) {
+                logger.warn(`[SiteSchemaService.getAllSiteSchema] getting site schema: ${JSON.stringify(res)}`);
+                return { success: false, message: "Site schema not found" };
+            } 
+            return { success: true, data: res.data };
+        } catch (error: any) {
+            logger.error(`[SiteSchemaService.getAllSiteSchema] getting site schema: ${error.message} | Stack Trace: ${error.stack}`);
+            return { success: false, message: "Site schema not found" };
+        }
+    }
+
     public async createSiteSchema(schemaData: any) {
         try {
             let dbData = dbNewSiteSchemaFactory(schemaData);

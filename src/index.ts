@@ -32,7 +32,7 @@ app.use('/user_dashboard/api/v1/health', (req, res) => {
 
 app.use('/user_dashboard/api/v1', verifyToken, companyController.getRouter());
 app.use('/user_dashboard/api/v1', userController.getRouter());
-app.use('/user_dashboard/api/v1', siteSchemaController.getRouter());
+app.use('/user_dashboard/api/v1', verifyToken, siteSchemaController.getRouter());
 app.use('/user_dashboard/api/v1', verifyToken, inviteController.getRouter());
 
 app.listen(config.port, () => {
