@@ -61,6 +61,26 @@ class CompanyMemberService {
         }
     }
 
+    async getCompanyMembersByCompanyIdWithRole(role: string, companyId: number, page: number, limit: number) {
+        try {
+            const res = await this.companyMemberRepository.findAllPaginated(
+                { company_id: "eq." + companyId, role_in_company: "eq." + role },
+                ["id,role_in_company,created_at, hired:user_id(id,name,email), hiredBy:hired_by(id,name,email)"],
+                page,
+                limit
+            )
+            if (!res || res.success === false) {
+                logger.error(`[CompanyMemberService.getCompanyMembersByCompanyId] Error fetching company members for company ID: ${companyId} | Response: ${JSON.stringify(res)}`);
+                return { success: false, message: "Company Members not found" };
+            } else {
+                return { success: true, data: res.data, pagination: res && 'pagination' in res ? res.pagination : undefined };
+            }
+        } catch (error: any) {
+            logger.error(`[CompanyMemberService.getCompanyMembersByCompanyId] Error fetching company members for company ID: ${companyId} | Stack Trace: ${error.stack}`);
+            return { success: false, message: "Company Members not found" };
+        }
+    }
+
     async getCompanyMemebrsByUserId(userId: number, page: number, limit: number) {
         try {
             const res = await this.companyMemberRepository.findAllPaginated(

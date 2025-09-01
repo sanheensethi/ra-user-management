@@ -17,6 +17,7 @@ class CompanyController {
         this.router.get('/company', this.getCompany.bind(this)); // i own
         this.router.get('/company/hiredBy', this.getHiredBy.bind(this)); // i am hired
         this.router.get('/company/hired', this.getIHired.bind(this)); // i hired
+        this.router.get('/company/hired/roles', this.getIHiredRoles.bind(this));
     }
 
     private async getCompany(req: Request, res: Response) {
@@ -81,6 +82,36 @@ class CompanyController {
                 let company_id = data.data.id;
                 // now get all company members based on company id
                 data = await this.companyMemberService.getCompanyMembersByCompanyId(company_id, page, limit);
+                if (data.success) {
+                    res.status(200).json({data: data.data, pagination: data.pagination});
+                } else {
+                    res.status(400).json({ message: data.message });
+                }
+            } else {
+                res.status(400).json({ message: data.message });
+            }
+        } catch (error: any) {
+            logger.error(`[CompanyController.getIHired] fetching company details: ${error.message} | Stack Trace: ${error.stack}`);
+            res.status(500).json({ message: "Internal Server Error" });
+        }
+    }
+
+    private async getIHiredRoles(req: Request, res: Response) {
+        try {
+            const userId = Number(req.user?.id) || 0;
+            if (userId === 0) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+            let { page = 1, limit = 10, role } = req.query;
+            page = Number(page);
+            limit = Number(limit);
+            const roleStr = typeof role === 'string' ? role : '';
+            // Logic to get company details
+            let data = await this.companyService.getCompanyByOwnerId(userId);
+            if (data.success) {
+                let company_id = data.data.id;
+                // now get all company members based on company id
+                data = await this.companyMemberService.getCompanyMembersByCompanyIdWithRole(roleStr, company_id, page, limit);
                 if (data.success) {
                     res.status(200).json({data: data.data, pagination: data.pagination});
                 } else {

@@ -9,6 +9,7 @@ import { routeHandler } from "./middleware/v1/routeHandler";
 import SiteSchemaController from "./controllers/v1/siteSchema.controller";
 import InviteController from "./controllers/v1/invite.controller";
 import verifyToken from "./middleware/v1/verifyToken";
+import SiteController from "./controllers/v1/site.controller";
 
 
 const app = express();
@@ -22,6 +23,7 @@ const companyController = new CompanyController();
 const userController = new UserController();
 const siteSchemaController = new SiteSchemaController();
 const inviteController = new InviteController();
+const siteController = new SiteController();
 
 app.use(routeHandler);
 
@@ -34,6 +36,7 @@ app.use('/user_dashboard/api/v1', verifyToken, companyController.getRouter());
 app.use('/user_dashboard/api/v1', userController.getRouter());
 app.use('/user_dashboard/api/v1', verifyToken, siteSchemaController.getRouter());
 app.use('/user_dashboard/api/v1', verifyToken, inviteController.getRouter());
+app.use('/user_dashboard/api/v1', verifyToken, siteController.getRouter());
 
 app.listen(config.port, () => {
   console.log(`user_dashboard listening on :${config.port}`);
